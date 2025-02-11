@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Pokédex</string>
+    <string name="Pokemon">Pokémon</string>
+    <string name="view_details">View Details</string>
+    <string name="pokemon_height">Height</string>
+    <string name="pokemon_weight">Weight</string>
+    <string name="pokemon_physical_characteristics">Physical characteristics</string>
+    <string name="pokemon_description">Description</string>
+    <string name="pokemon_type">Type</string>
+    <string name="pokemon_base_stats">Base Stats</string>
+</resources>
