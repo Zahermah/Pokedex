@@ -10,6 +10,7 @@ activityCompose = "1.10.0"
 composeVersion = "1.7.7"
 composeHiltNavigationVersion = "1.2.0"
 composeNavigationVersion = "2.8.6"
+navigationAnimation = "0.31.5-beta"
 uiComposeVersion = "1.7.7"
 animationComposeVersion = "1.7.7"
 foundationComposeVersion = "1.7.7"
@@ -28,6 +29,7 @@ paletteVersion = "1.0.0"
 paging = "3.3.5"
 
 
+
 [libraries]
 # Architecture
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +44,7 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-navigate-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigationVersion" }
+accompanist-navigation-animation = { group = "com.google.accompanist", name = "accompanist-navigation-animation", version.ref = "navigationAnimation" }
 androidx-hilt-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "composeHiltNavigationVersion" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "composeVersion" }
 androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "composeVersion" }

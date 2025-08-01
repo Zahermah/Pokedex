@@ -24,18 +24,19 @@ class PokemonDetailViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
     private var currentPokemonId: Int? = null
 
-
     init {
         viewModelScope.launch {
             networkConnectivityObserver.observe().collect { connectionState ->
                 if (connectionState is NetworkConnectivityObserver.ConnectionState.Available
                     && _uiState.value is PokemonDetailUiState.Error
+                    && _uiState.value !is PokemonDetailUiState.Loading
                 ) {
                     currentPokemonId?.let { loadPokemonDetail(it) }
                 }
             }
         }
     }
+
 
     fun loadPokemonDetail(pokemonId: Int) {
         Log.d("PokemonDetail", "Loading Pokemon detail for ID: $pokemonId")

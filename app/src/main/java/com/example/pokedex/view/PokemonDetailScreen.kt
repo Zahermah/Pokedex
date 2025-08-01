@@ -2,6 +2,9 @@ package com.example.pokedex.view
 
 import android.R.drawable
 import android.util.Log
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -60,10 +63,12 @@ import com.example.pokedex.viewmodel.PokemonDetailViewModel
 
 private const val TAG = "PokemonDetailList"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun PokemonDetailScreen(
     pokemonId: Int,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     viewModel: PokemonDetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
@@ -72,19 +77,22 @@ fun PokemonDetailScreen(
     LaunchedEffect(pokemonId) {
         Log.d("PokemonDetail", "Loading Pokemon details for ID: $pokemonId")
         viewModel.loadPokemonDetail(pokemonId)
-        viewModel
     }
 
     PokemonDetailScaffold(
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope,
         uiState = uiState,
         onBackClick = onBackClick,
         onRetryClick = { viewModel.loadPokemonDetail(pokemonId) }
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PokemonDetailScaffold(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     uiState: PokemonDetailUiState,
     onBackClick: () -> Unit,
     onRetryClick: () -> Unit
@@ -107,7 +115,11 @@ private fun PokemonDetailScaffold(
 
                 is PokemonDetailUiState.Success -> {
                     Log.d("PokemonDetail", "Loaded Pokemon: ${uiState.pokemon.name}")
-                    PokemonDetailContent(pokemon = uiState.pokemon)
+                    PokemonDetailContent(
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope,
+                        pokemon = uiState.pokemon
+                    )
                 }
 
                 is PokemonDetailUiState.Error -> {
@@ -143,9 +155,13 @@ private fun PokemonDetailTopBar(onBackClick: () -> Unit) {
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonDetailContent(pokemon: PokemonDetail) {
+private fun PokemonDetailContent(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    pokemon: PokemonDetail
+) {
     val scrollState = rememberSaveable(saver = ScrollState.Saver) {
         ScrollState(initial = 0)
     }
@@ -155,13 +171,26 @@ private fun PokemonDetailContent(pokemon: PokemonDetail) {
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        PokemonHeader(pokemon = pokemon)
-        PokemonInfo(pokemon = pokemon)
+        PokemonHeader(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
+            pokemon = pokemon
+        )
+        PokemonInfo(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
+            pokemon = pokemon
+        )
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonHeader(pokemon: PokemonDetail) {
+private fun PokemonHeader(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    pokemon: PokemonDetail
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -173,8 +202,11 @@ private fun PokemonHeader(pokemon: PokemonDetail) {
             contentAlignment = Alignment.Center
         ) {
             PokemonImage(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
                 imageUrl = pokemon.imageUrl,
                 pokemonName = pokemon.name,
+                pokemonId = pokemon.id
             )
         }
     }
@@ -196,31 +228,48 @@ private fun GradientBackground() {
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PokemonImage(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     imageUrl: String,
     pokemonName: String,
-
-    ) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = pokemonName,
-        modifier = Modifier
-            .size(200.dp),
-        contentScale = ContentScale.Fit,
-        error = painterResource(id = drawable.star_on)
-    )
+    pokemonId: Int
+) {
+    with(sharedTransitionScope) {
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = pokemonName,
+            modifier = Modifier
+                .size(200.dp)
+                .sharedElement(
+                    state = rememberSharedContentState(key = "pokemon_image_$pokemonId"),
+                    animatedVisibilityScope = animatedContentScope
+                ),
+            contentScale = ContentScale.Fit,
+            error = painterResource(id = drawable.star_on)
+        )
+    }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonInfo(pokemon: PokemonDetail) {
+private fun PokemonInfo(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    pokemon: PokemonDetail
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        PokemonBasicInfo(pokemon = pokemon)
+        PokemonBasicInfo(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
+            pokemon = pokemon
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         PokemonTypeSection(types = pokemon.types)
@@ -241,13 +290,25 @@ private fun PokemonInfo(pokemon: PokemonDetail) {
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonBasicInfo(pokemon: PokemonDetail) {
-    Text(
-        text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = Modifier.fillMaxWidth()
-    )
+private fun PokemonBasicInfo(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    pokemon: PokemonDetail
+) {
+    with(sharedTransitionScope) {
+        Text(
+            text = pokemon.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() },
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .sharedElement(
+                    state = rememberSharedContentState(key = "pokemon_name_${pokemon.id}"),
+                    animatedVisibilityScope = animatedContentScope
+                )
+        )
+    }
 
     Text(
         text = "#${pokemon.id.toString().padStart(3, '0')}",

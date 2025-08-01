@@ -3,13 +3,13 @@ package com.example.pokedex.data.paging
 import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.pokedex.domain.usecases.GetPokemonListUseCase
 import com.example.pokedex.model.Pokemon
+import com.example.pokedex.repository.PokemonRepository
 import javax.inject.Inject
 
 
 class PokemonPagingSource @Inject constructor(
-    private val getPokemonListUseCase: GetPokemonListUseCase
+    private val pokemonRepository: PokemonRepository
 ) : PagingSource<Int, Pokemon>() {
 
     override fun getRefreshKey(state: PagingState<Int, Pokemon>): Int? {
@@ -34,7 +34,7 @@ class PokemonPagingSource @Inject constructor(
             val startPosition = currentPage * itemsPerPage
 
 
-            val pokemonList = getPokemonListUseCase(
+            val pokemonList = pokemonRepository.getPokemonList(
                 offset = startPosition,
                 limit = itemsPerPage
             )

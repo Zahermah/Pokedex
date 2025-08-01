@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.pokedex"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.pokedex"
@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.animation)
     implementation(libs.androidx.foundation)
+    implementation(libs.accompanist.navigation.animation)
     //Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)

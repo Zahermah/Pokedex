@@ -31,40 +31,52 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.pokedex.R.string.Pokemon
 import com.example.pokedex.R.string.view_details
 import com.example.pokedex.model.Pokemon
 import com.example.pokedex.viewmodel.PokemonListViewModel
 
 private const val TAG = "PokemonDetailList"
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun PokemonListScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     viewModel: PokemonListViewModel = hiltViewModel(),
-    onPokemonClick: (Int) -> Unit
+    onPokemonClick: (Int) -> Unit,
 ) {
     val pokemonPagingItems = viewModel.pokemonList.collectAsLazyPagingItems()
     Log.d(TAG, "Initializing PokemonListScreen")
 
     PokemonListScaffold(
+        sharedTransitionScope = sharedTransitionScope,
+        animatedContentScope = animatedContentScope,
         pokemonPagingItems = pokemonPagingItems,
         onPokemonClick = onPokemonClick
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PokemonListScaffold(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     pokemonPagingItems: LazyPagingItems<Pokemon>,
-    onPokemonClick: (Int) -> Unit
+    onPokemonClick: (Int) -> Unit,
 ) {
     Scaffold(
         topBar = { PokemonListTopBar() }
     ) { paddingValues ->
         PokemonList(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
             pokemonPagingItems = pokemonPagingItems,
             contentPadding = paddingValues,
             onPokemonClick = onPokemonClick
@@ -78,7 +90,7 @@ private fun PokemonListTopBar() {
     TopAppBar(
         title = {
             Text(
-                text = stringResource(com.example.pokedex.R.string.Pokemon),
+                text = stringResource(Pokemon),
                 style = MaterialTheme.typography.headlineMedium
             )
         },
@@ -89,8 +101,11 @@ private fun PokemonListTopBar() {
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PokemonList(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     pokemonPagingItems: LazyPagingItems<Pokemon>,
     contentPadding: PaddingValues,
     onPokemonClick: (Int) -> Unit
@@ -114,6 +129,8 @@ private fun PokemonList(
             val pokemon = pokemonPagingItems[index]
             pokemon?.let {
                 PokemonListItem(
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope,
                     pokemon = it,
                     onClick = {
                         Log.d(TAG, "Selected Pokemon: id=${it.id}, name=${it.name}")
@@ -142,7 +159,8 @@ private fun PokemonList(
                             error = loadState.refresh as LoadState.Error,
                             onRetry = {
                                 Log.d(TAG, "Retrying initial load")
-                                retry() }
+                                retry()
+                            }
                         )
                     }
                 }
@@ -154,7 +172,8 @@ private fun PokemonList(
                             error = loadState.append as LoadState.Error,
                             onRetry = {
                                 Log.d(TAG, "Retrying pagination")
-                                retry() }
+                                retry()
+                            }
                         )
                     }
                 }
@@ -163,8 +182,11 @@ private fun PokemonList(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PokemonListItem(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     pokemon: Pokemon,
     onClick: () -> Unit
 ) {
@@ -181,36 +203,68 @@ private fun PokemonListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            PokemonImage(pokemon = pokemon)
-            PokemonInfo(modifier = Modifier.weight(1f), pokemon = pokemon)
+            PokemonImage(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
+                pokemon = pokemon
+            )
+            PokemonInfo(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
+                modifier = Modifier.weight(1f), 
+                pokemon = pokemon
+            )
         }
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonImage(pokemon: Pokemon) {
-    AsyncImage(
-        model = pokemon.imageUrl,
-        contentDescription = pokemon.name,
-        modifier = Modifier
-            .size(80.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentScale = ContentScale.Crop,
-        error = painterResource(id = drawable.stat_notify_error)
-    )
+private fun PokemonImage(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    pokemon: Pokemon
+) {
+    with(sharedTransitionScope) {
+        AsyncImage(
+            model = pokemon.imageUrl,
+            contentDescription = pokemon.name,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .sharedElement(
+                    state = rememberSharedContentState(key = "pokemon_image_${pokemon.id}"),
+                    animatedVisibilityScope = animatedContentScope
+                ),
+            contentScale = ContentScale.Crop,
+            error = painterResource(id = drawable.stat_notify_error)
+        )
+    }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PokemonInfo(modifier: Modifier = Modifier, pokemon: Pokemon) {
+private fun PokemonInfo(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    modifier: Modifier = Modifier, 
+    pokemon: Pokemon
+) {
     Column(modifier = modifier) {
-        Text(
-            text = pokemon.name.replaceFirstChar {
-                if (it.isLowerCase()) it.titlecase() else it.toString()
-            },
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        with(sharedTransitionScope) {
+            Text(
+                text = pokemon.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase() else it.toString()
+                },
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.sharedElement(
+                    state = rememberSharedContentState(key = "pokemon_name_${pokemon.id}"),
+                    animatedVisibilityScope = animatedContentScope
+                )
+            )
+        }
         Text(
             text = "#${pokemon.id.toString().padStart(3, '0')}",
             style = MaterialTheme.typography.bodyMedium,
@@ -235,4 +289,3 @@ private fun ErrorItem(
         onRetryClick = onRetry
     )
 }
-
