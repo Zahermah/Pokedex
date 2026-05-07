@@ -2,7 +2,6 @@ name: Android CI
 
 on:
   push:
-    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 
@@ -50,6 +49,12 @@ jobs:
           name: test-results
           path: app/build/test-results/testDebugUnitTest/
 
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-html
+          path: app/build/reports/coverage/test/debug/
+
       - name: Post coverage comment on PR
         uses: madrapps/jacoco-report@v1.7.1
         if: github.event_name == 'pull_request'
@@ -64,7 +69,7 @@ jobs:
           fail-emoji: ❌
 
       - name: Upload Pages artifact
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/master' && github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3
         with:
           path: app/build/reports/coverage/test/debug/
@@ -73,7 +78,7 @@ jobs:
     name: Publish Coverage to GitHub Pages
     needs: unit-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
