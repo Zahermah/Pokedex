@@ -27,6 +27,8 @@ swipeRefreshLayoutVersion = "1.1.0"
 gsonVersion = "2.11.0"
 paletteVersion = "1.0.0"
 paging = "3.3.5"
+mockkVersion = "1.13.12"
+turbineVersion = "1.2.0"
 
 
 
@@ -80,6 +82,9 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "j
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version.ref = "composeVersion" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockkVersion" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbineVersion" }
+coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutineVersion" }
 
 
 [plugins]
