@@ -33,4 +33,26 @@ class PokemonImageProviderTest {
         val url2 = PokemonImageProvider.getSpriteUrl(2)
         assertTrue(url1 != url2)
     }
+
+    @Test
+    fun `getShinyUrl returns correct URL for charizard`() {
+        val url = PokemonImageProvider.getShinyUrl(6)
+        assertEquals(
+            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/6.png",
+            url
+        )
+    }
+
+    @Test
+    fun `getShinyUrl contains shiny path segment`() {
+        val url = PokemonImageProvider.getShinyUrl(25)
+        assertTrue(url.contains("shiny"))
+    }
+
+    @Test
+    fun `getShinyUrl and getSpriteUrl differ for same pokemon`() {
+        val shiny = PokemonImageProvider.getShinyUrl(1)
+        val normal = PokemonImageProvider.getSpriteUrl(1)
+        assertTrue(shiny != normal)
+    }
 }
